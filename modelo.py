@@ -2,7 +2,8 @@ import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
 import pickle
 
-# Dados fornecidos
+brasileirao_data = pd.read_csv('Brasileirao.csv')
+
 dados_desempenho = {
     'Posicao': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
     'Estado': ['Minas Gerais', 'Rio de Janeiro', 'São Paulo', 'Ceará', 'São Paulo', 'São Paulo', 'Rio de Janeiro', 'Minas Gerais', 'Goiás', 'São Paulo', 'Ceará', 'Rio Grande do Sul', 'São Paulo', 'Paraná', 'Mato Grosso', 'Rio Grande do Sul', 'Rio Grande do Sul', 'Bahia', 'Pernambuco', 'Santa Catarina'],
@@ -18,21 +19,27 @@ dados_desempenho = {
     'Obs': ['Fase de grupos da Copa Libertadores de 2022[a]', '', '', '', '', '', 'Segunda fase da Copa Libertadores de 2022', '','Fase de grupos da Copa Sul-Americana de 2022', '', '', '', '', 'Fase de grupos da Copa Libertadores de 2022[a]', 'Fase de grupos da Copa Sul-Americana de 2022', '', 'Rebaixados à Série B de 2022', '']
 }
 
-# Criar DataFrame
-df = pd.DataFrame(dados_desempenho)
-
-# Selecionando as colunas relevantes
 features = ['Pontos', 'Jogos', 'Vitorias', 'Empates', 'Derrotas', 'GolsMarcados', 'GolsSofridos']
-target = 'Desempenho'  # Nome da coluna para prever o desempenho
+target = 'Desempenho'  
 
-# Extraindo os recursos (features) e os rótulos (labels)
+
 x = df[features]
 y = df[target]
 
-# Treinando um classificador de árvore de decisão
+
 clf = DecisionTreeClassifier()
 clf = clf.fit(x, y)
 
-# Salvando o modelo treinado em um arquivo
+
+preditos = clf.predict(x)
+print("Preditos:", preditos)
+print("Real    :", y)
+
+
+from sklearn.metrics import accuracy_score
+print("Acuracia:", accuracy_score(y, preditos))
+
+
+
 pickle.dump(clf, open('model.pkl', 'wb'))
 model = pickle.load(open('model.pkl', 'rb'))
