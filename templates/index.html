@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Classificador de Desempenho de Times Brasileiros 2020</title>
+    <link href='https://fonts.googleapis.com/css?family=Pacifico' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Arimo' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Hind:300' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <span id="imagem1"><img src="{{ url_for('static', filename='bras.jpg') }}" alt=""></span>
+    <div class="resultados">
+        <h1>Classificador de Desempenho de Times Brasileiros 2021</h1>
+
+        <!-- Main Input For Receiving Query to our ML -->
+        <form action="{{ url_for('predict') }}" method="post">
+          
+            <input type="text" name="Pontos" placeholder="Pontos" required="required" />
+            <input type="text" name="Jogos" placeholder="Jogos" required="required" />
+            <input type="text" name="Vitorias" placeholder="Vitórias" required="required" />
+            <input type="text" name="Empates" placeholder="Empates" required="required" />
+            <input type="text" name="Derrotas" placeholder="Derrotas" required="required" />
+            <input type="text" name="GolsMarcados" placeholder="Gols Marcados" required="required" />
+            <input type="text" name="GolsSofridos" placeholder="Gols Sofridos" required="required" />
+            
+            <button type="submit" class="btn btn-primary btn-block btn-large">Classificar Desempenho</button>
+        </form>
+
+        <br>
+        <br>
+        <h1>Resultado:</h1>
+        {{ prediction_text }}
+        
+    </div>
+</body>
+
+</html>
