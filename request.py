@@ -19,12 +19,13 @@ data = {
 r = requests.post(url, json=data)
 
 result = r.json()
-if "Desempenho" in result:
-    if result["Desempenho"] == "Bom":
+if "is_desempenho" in result:
+    if result["is_desempenho"]:
         print("Este time teve um bom desempenho!")
-    elif result["Desempenho"] == "Ruim":
-        print("Este time teve um desempenho ruim.")
+   
+        
     else:
-        print("Desempenho não determinado.")
+        print("Este time teve um desempenho ruim.")
+    
 else:
-    print("Erro na resposta da API.")
+    print("Erro na resposta.")
