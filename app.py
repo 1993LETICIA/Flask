@@ -1,77 +1,43 @@
-import numpy as np
-from flask import Flask, render_template, request
-from flask_cors import CORS
+import pandas as pd
+from flask import Flask, request, render_template
 import pickle
 
 app = Flask(__name__)
-CORS(app)
 
-model = pickle.load(open("model.pkl", "rb"))
+# Carregar o modelo treinado
+model = pickle.load(open('model.pkl', 'rb'))
 
-@app.route("/")
+# Rota principal
+@app.route('/')
 def home():
-    return render_template("index.html")
+    return render_template('index.html')
 
-@app.route("/predict", methods=["POST"])
+# Rota para previsões
+@app.route('/predict', methods=['POST'])
 def predict():
-    try:
-     
-        features = [float(request.form['Pontos']),
-                    float(request.form['Jogos']), float(request.form['Vitorias']),
-                    float(request.form['Empates']), float(request.form['Derrotas']),
-                    float(request.form['GolsMarcados']), float(request.form['GolsSofridos'])]
+    # Recuperar os dados do formulário
+    int_features = [int(x) for x in request.form.values()]
+    
+    # Certificar-se de que há 7 características como no treinamento
+    if len(int_features) != 7:
+        return render_template('index.html', prediction_text='Erro: Forneça os dados corretos.')
 
-        # Verificar se todos os campos estão presentes
-        if None in features:
-            raise ValueError("Dados incompletos.")
+    # Adicionar 'SG' com valor 0 (zero)
+    int_features.append(0)
 
-        # Realizar a previsão
-        pred = model.predict([features])
-        predicted_desempenho = pred[0] 
+    final_features = pd.DataFrame([int_features], columns=['Pts', 'J', 'V', 'E', 'D', 'GP', 'GC', 'SG'])
 
-       
-        # Adicione a lógica para determinar a classe com base nas probabilidades
-        if predicted_desempenho == 1:  
-            prediction_text = "Este time teve um bom desempenho!"
-        else:
-            prediction_text = "Este time teve um desempenho ruim."
+    # Fazer a previsão
+    prediction_proba = model.predict_proba(final_features)
+    
+    # Considerar desempenho maior que 50% como "bom" e menor ou igual a 50% como "ruim"
+    if prediction_proba[0][1] > 0.5:
+        prediction_text = 'Bom desempenho'
+    else:
+        prediction_text = 'Ruim desempenho'
 
-        return render_template("index.html", prediction_text=prediction_text)
+    # Renderizar a página com os resultados
+    return render_template('index.html', prediction_text=f'O desempenho previsto é {prediction_text}.')
 
-    except Exception as e:
-        return render_template("index.html", prediction_text=f"Erro: preencha todos os campos.")
-
-# Altere o trecho de código na rota /api para retornar HTML
-@app.route("/api", methods=["POST"])
-def api_predict():
-    try:
-        data = request.get_json()
-
-        # Coletar dados do JSON
-        pontos = float(data['Pontos'])
-        jogos = float(data['Jogos'])
-        vitorias = float(data['Vitorias'])
-        empates = float(data['Empates'])
-        derrotas = float(data['Derrotas'])
-        gols_marcados = float(data['GolsMarcados'])
-        gols_sofridos = float(data['GolsSofridos'])
-
-      
-
-        # Verificar se todos os campos estão presentes
-        if None in [pontos, jogos, vitorias, empates, derrotas, gols_marcados, gols_sofridos]:
-            raise ValueError("Dados incompletos.")
-
-        # Realizar a previsão
-        features = [pontos, jogos, vitorias, empates, derrotas, gols_marcados, gols_sofridos]
-        pred_proba = model.predict([features])
-        predicted_desempenho = pred[0] 
-
-        return jsonify({"is_desempenho": bool(predicted_desempenho)})
-
-    except Exception as e:
-        return jsonify({"error": "Erro: preencha todos os campos."})
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run(debug=True)
